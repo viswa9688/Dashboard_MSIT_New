@@ -1,10 +1,10 @@
 import csv
 import smtplib
+import os
 
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
+from dotenv import load_dotenv
 
-
+load_dotenv(verbose=True)
 def user_exists(email):
     with open('./users/users.csv', mode='r', newline='') as file:
         reader = csv.reader(file)
@@ -18,8 +18,8 @@ def send_email(email, username):
     # Set up SMTP server
     smtp_server = "smtp.gmail.com"
     smtp_port = 587  # Update with your SMTP port
-    smtp_username = "jayakrishnad2002@gmail.com"
-    smtp_password = "fzel jsmt alrh djea"
+    smtp_username = os.environ.get('SMTP_USERNAME')
+    smtp_password = os.environ.get('SMTP_PASSWORD')
 
     server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()
