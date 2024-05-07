@@ -1,7 +1,8 @@
+import os
 import sys
 sys.path.append('C:/Python39/Lib/site-packages')
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import csv, json
 import pandas as pd
@@ -288,3 +289,44 @@ def get_presentation_scores():
         ppt_scores[row_data[1].lower()] = row_data_json
     
     return ppt_scores
+
+# Load CSV data into memory as a list of dictionaries
+def load_data(csv_file):
+    data = []
+    with open(csv_file, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        # next(reader)
+        for row in reader:
+            data.append(row)
+        print(len(data))
+    return data
+
+# Search function to filter data based on search query
+def search_data(data, query):
+    results = []
+    for item in data:
+        print(item.values())
+        # Check if the query appears in any value of the dictionary
+        if any(query.lower() in str(value).lower() for value in item.values()):
+            results.append(item)
+    print(results)
+    return results
+
+# Endpoint for searching data
+@app.route('/search', methods=['GET'])
+def search():
+    csv_file = './Data.csv'
+    data = load_data(csv_file)
+    
+    # Extract search query from query parameter
+    query = request.args.get('query')
+    
+    # Perform search based on query
+    if query:
+        results = search_data(data, query)
+        return jsonify(results)
+    else:
+        return jsonify({'error': 'No search query provided'}), 400
+
+if __name__ == '__main__':
+    app.run(debug=True)
