@@ -1,46 +1,61 @@
 import axios from "axios";
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { GoogleLogin } from "react-google-login";
-// refresh token
-import { refreshTokenSetup } from "../utils/refreshToken";
+import { withRouter } from "react-router-dom";
 
-const clientId =
-  "517972967421-7vd20rig40hriq0rlapi67al4q717n05.apps.googleusercontent.com";
+const clientId = "517972967421-7vd20rig40hriq0rlapi67al4q717n05.apps.googleusercontent.com";
+
 function Login(props) {
+  const [userData, setUserData] = useState([]);
+  const [redirected, setRedirected] = useState(false);
+
+  useEffect(() => {
+    axios.get("/Data.csv").then((response) => {
+      const parsedData = parseCSV(response.data);
+      setUserData(parsedData);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (userData.length > 0 && redirected) {
+      redirectToRolePage();
+    }
+  }, [userData, redirected]);
+
+  const parseCSV = (csvData) => {
+    const lines = csvData.split("\n");
+    const data = lines.slice(1).map((line) => {
+      const [email, role] = line.split(",");
+      return { email, role };
+    });
+    return data;
+  };
+
+  const redirectToRolePage = () => {
+    const userEmail = localStorage.getItem("userEmail");
+    const user = userData.find((user) => user.email === userEmail);
+    if (user) {
+      switch (user.role) {
+        case "admin":
+          props.history.push("/admin");
+          break;
+        case "mentor":
+          props.history.push("/mentor");
+          break;
+        case "student":
+          props.history.push("/student");
+          break;
+        default:
+          break;
+      }
+    } else {
+      alert("User not found or role not specified.");
+    }
+  };
+
   const onSuccess = (res) => {
-    // alert(`Logged in successfully welcome ${res.profileObj.name}`);
-    console.log("Login successful");
-
-    axios
-      .get(
-        `https://7seqbvouv4.execute-api.ap-south-1.amazonaws.com/default/StudentZoomData_MentorDashboard/?mentor_email=${res.profileObj.email}&operation=mentor_check`
-      )
-      .then((response) => {
-        props.updateMentorFlag(response.data.mentor);
-        props.updateStudentEmailList(response.data.student_email_list);
-      });
-
-    let email = res.profileObj.email;
-    if (props.mentor) email = props.studentEmail;
-
-    axios
-      .get(
-        `https://7seqbvouv4.execute-api.ap-south-1.amazonaws.com/StudentZoom/StudentZoomData_CoursePerformance/?email=${email}`
-      )
-      .then((response) => {
-        if (response.data === "Student dropped out") {
-          props.updateDropoutFlag(true);
-        } else {
-          props.updateData(response.data);
-          props.updateScore(response.data.course_attendance.IT);
-          props.updateSSScore(response.data.course_attendance.SS);
-        }
-      });
-
-    props.updateLogin(true);
-    props.updateEmail(res.profileObj.email);
-    refreshTokenSetup(res);
+    localStorage.setItem("userEmail", res.profileObj.email);
+    setRedirected(true); // Set redirected to true to trigger redirection
   };
 
   const onFailure = (res) => {
@@ -50,19 +65,21 @@ function Login(props) {
 
   return (
     <div>
-      <GoogleLogin
-        clientId={clientId}
-        buttonText="Login"
-        onSuccess={onSuccess}
-        onFailure={onFailure}
-        cookiePolicy={"single_host_origin"}
-        style={{ marginTop: "0px" }}
-        isSignedIn={true}
-      />
+      {redirected ? null : (
+        <GoogleLogin
+          clientId={clientId}
+          buttonText="Login"
+          onSuccess={onSuccess}
+          onFailure={onFailure}
+          cookiePolicy={"single_host_origin"}
+          style={{ marginTop: "0px" }}
+          isSignedIn={true}
+        />
+      )}
       <br />
       <br />
     </div>
   );
 }
 
-export default Login;
+export default withRouter(Login);

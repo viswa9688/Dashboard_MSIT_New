@@ -1,16 +1,18 @@
+// Logout.js
 import React from "react";
 import { GoogleLogout } from "react-google-login";
+import { useHistory } from "react-router-dom";
 
 const clientId =
   "707788443358-u05p46nssla3l8tmn58tpo9r5sommgks.apps.googleusercontent.com";
 
-function Logout(props) {
+function Logout() {
+  const history = useHistory();
+
   const onSuccess = () => {
     console.log("Logout made successfully");
-    // alert("Logout made successfully.");
-    props.updateLogin(false);
-    props.updateMentorFlag(false);
-    props.updateStudentEmailList([]);
+    // Redirect to landing page after successful logout
+    history.push("/");
   };
 
   return (
@@ -19,7 +21,7 @@ function Logout(props) {
         clientId={clientId}
         buttonText="Logout"
         onLogoutSuccess={onSuccess}
-      ></GoogleLogout>
+      />
     </div>
   );
 }
