@@ -11,6 +11,8 @@ from collections import OrderedDict
 from collections import defaultdict
 import datetime
 
+from utils import user_exists, send_email
+
 app = Flask(__name__)
 CORS(app)
 
@@ -52,13 +54,7 @@ def zoom_att(student_email):
     })
 
 
-def user_exists(email):
-    with open('./users/users.csv', mode='r', newline='') as file:
-        reader = csv.reader(file)
-        for row in reader:
-            if row[0] ==  email:
-                return True
-    return False
+
 
 @app.route('/add-user/', methods=['POST'])
 def add_user():
@@ -73,7 +69,7 @@ def add_user():
     with open('./users/users.csv', mode='a', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow([email, username])
-
+    send_email(email, username)
     return jsonify({'message': 'User details stored successfully'}), 201
 
 
