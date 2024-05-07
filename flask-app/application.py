@@ -288,3 +288,62 @@ def get_presentation_scores():
         ppt_scores[row_data[1].lower()] = row_data_json
     
     return ppt_scores
+
+from flask import Flask, request, jsonify
+import csv
+import os
+import json
+
+app = Flask(__name__)
+
+DATA_CSV_PATH = 'Dashboard_MSIT_New/react-google-authentication-master/src/components/Data1.csv'
+
+def check_duplicate(email):
+    with open(DATA_CSV_PATH, 'r', newline='') as file:
+        reader = csv.DictReader(file)
+        return any(row['email'] == email for row in reader)
+
+def add_to_csv(row):
+    fieldnames = row.keys()
+    with open(DATA_CSV_PATH, 'a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        if file.tell() == 0:
+            writer.writeheader()
+        writer.writerow(row)
+
+def process_data(data):
+    if isinstance(data, dict):  # Single JSON object
+        email = data.get('email')
+        if email and not check_duplicate(email):
+            add_to_csv(data)
+    elif isinstance(data, list):  # List of JSON objects
+        for entry in data:
+            email = entry.get('email')
+            if email and not check_duplicate(email):
+                add_to_csv(entry)
+    else:
+        return jsonify({'error': 'Invalid data format'})
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    if 'file' in request.files:
+        file = request.files['file']
+        if file.filename.endswith('.csv'):
+            reader = csv.DictReader(file.read().decode('utf-8').splitlines())
+            for row in reader:
+                email = row.get('email')
+                if not check_duplicate(email):
+                    add_to_csv(row)
+    else:
+        try:
+            data = json.loads(request.data.decode('utf-8'))
+            process_data(data)
+        except json.JSONDecodeError:
+            return jsonify({'error': 'Invalid JSON data format'})
+
+    return jsonify({'message': 'Data added successfully'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+
