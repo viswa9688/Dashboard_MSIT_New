@@ -4,15 +4,14 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+
 def user_exists(email):
     with open('./users/users.csv', mode='r', newline='') as file:
         reader = csv.reader(file)
         for row in reader:
-            if row[0] ==  email:
+            if row[0] == email:
                 return True
     return False
-
-
 
 
 def send_email(email, username):
@@ -26,19 +25,19 @@ def send_email(email, username):
     server.starttls()
     server.login(smtp_username, smtp_password)
 
-    from_email="jayakrishnad2002@gmail.com"
-    to_email=email
-    subject="MSIT Dashboard"
-    message=f"""
+    from_email = "jayakrishnad2002@gmail.com"
+    to_email = email
+    subject = "MSIT Dashboard"
+    message = f"""
     Dear {username}
     Congratulations! You succesfully registed at MSIT Dashboard
 
 
     Thanks,
-    MSIT Admin      
+    MSIT Admin
     """
 
-    text=f'Subject: {subject}\n\n{message}'
+    text = f'Subject: {subject}\n\n{message}'
 
     # Send email
     server.sendmail(from_email, to_email, text)
