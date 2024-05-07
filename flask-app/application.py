@@ -104,6 +104,18 @@ def add_users():
         return jsonify({'message': 'Invalid file format. Please upload a CSV file.'})
 
 
+@app.route('/search-emails', methods=['GET'])
+def search_emails():
+    query_param = request.args.get('query')
+    with open('users.csv', mode='r', encoding='utf-8') as file:
+        csv_reader = csv.DictReader(file)
+        emails = [row['email'] for row in csv_reader]
+
+    suggestions = [email for email in emails if query_param in email]
+
+    return jsonify({'emails': suggestions})
+
+
 @app.route("/update_data")
 def read_file():
     # print("Hello")
