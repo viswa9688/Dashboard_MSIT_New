@@ -1,7 +1,9 @@
+import io
 import sys
 sys.path.append('C:/Python39/Lib/site-packages')
 
-from flask import Flask, render_template, jsonify,request
+from flask import Flask, render_template, jsonify, request
+
 from flask_cors import CORS
 import csv, json
 import pandas as pd
@@ -51,13 +53,12 @@ def zoom_att(student_email):
 
 
 def user_exists(email):
-    with open('user_data.csv', mode='r', newline='') as file:
+    with open('./users/users.csv', mode='r', newline='') as file:
         reader = csv.reader(file)
         for row in reader:
-            if row[0] == email:
+            if row[0] ==  email:
                 return True
     return False
-
 
 @app.route('/add-user/', methods=['POST'])
 def add_user():
@@ -74,6 +75,34 @@ def add_user():
         writer.writerow([email, username])
 
     return jsonify({'message': 'User details stored successfully'}), 201
+
+
+@app.route('/add-users/', methods=['POST'])
+def add_users():
+    if 'file' not in request.files:
+        return jsonify({'message':'No file part'})
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'message': 'No selected file'})
+
+    if file and file.filename.endswith('.csv'):
+        try:
+            with open('./users/users.csv', mode='a', newline='', encoding='utf-8') as csvfile:
+                csv_writer = csv.writer(csvfile)
+                csv_file = io.TextIOWrapper(file, encoding='utf-8')
+                csv_reader = csv.reader(csv_file)
+                for row in csv_reader:
+                    if not user_exists(row[0]):
+                        csv_writer.writerow(row)
+                        
+            return jsonify({'message': 'Users details stored successfully'}), 201
+
+        except Exception as e:
+            return jsonify({'message': f'Error: {str(e)}'})
+    else:
+        return jsonify({'message': 'Invalid file format. Please upload a CSV file.'})
+
 
 @app.route("/update_data")
 def read_file():
@@ -314,3 +343,7 @@ def get_presentation_scores():
         ppt_scores[row_data[1].lower()] = row_data_json
     
     return ppt_scores
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
