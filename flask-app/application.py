@@ -30,7 +30,7 @@ SS_course_dates = {
 }
 
 @app.route('/student-scores/<string:student_email>')
-def student_score_reader_excel(student_email):
+def student_score(student_email):
     creds_path = "./msit.json"
     credential = ServiceAccountCredentials.from_json_keyfile_name(creds_path,
                                                                 ["https://spreadsheets.google.com/feeds",
@@ -45,19 +45,19 @@ def student_score_reader_excel(student_email):
     values = worksheet.get_all_values()
     data_json = []
 
-    
     headers = values[0]
     for row in values[1:]:
         if row[1] == student_email:
-            return json.dumps([dict(zip(headers,row))],indent=4)
+            data_json = json.dumps([dict(zip(headers,row))],indent=4)
         # row_dict = dict(zip(headers, row))
         # data_json.append(row_dict)
 
 
     # json_str = json.dumps(data_json, indent=4)
-
-
-    return []
+    if data_json == []:
+        return jsonify({'message':"Email Not found"})
+    else:
+        return data_json
 
 
 @app.route("/info/<string:student_email>")
