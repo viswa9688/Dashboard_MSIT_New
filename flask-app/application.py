@@ -1,7 +1,8 @@
 import os
 import sys
 sys.path.append('C:/Python39/Lib/site-packages')
-
+from dotenv import load_dotenv
+import os
 from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import csv, json
@@ -9,6 +10,8 @@ import pandas as pd
 from collections import OrderedDict 
 from collections import defaultdict
 import datetime
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
 app = Flask(__name__)
 CORS(app)
@@ -25,6 +28,35 @@ IT_course_dates = {
 SS_course_dates = {
     "SS":["2021-02-08","2021-04-02"]
 }
+
+@app.route('/student-scores')
+def student_score_reader_excel():
+    creds_path = "./msit.json"
+    credential = ServiceAccountCredentials.from_json_keyfile_name(creds_path,
+                                                                ["https://spreadsheets.google.com/feeds",
+                                                                "https://www.googleapis.com/auth/spreadsheets",
+                                                                "https://www.googleapis.com/auth/drive.file",
+                                                                "https://www.googleapis.com/auth/drive"])
+
+    sheet_url = os.environ.get('sheet_url')
+    client = gspread.authorize(credential)
+    sheet = client.open_by_url(sheet_url)
+    worksheet = sheet.get_worksheet(0)
+    values = worksheet.get_all_values()
+    data_json = []
+
+    
+    headers = values[0]
+    for row in values[1:]:
+
+        row_dict = dict(zip(headers, row))
+        data_json.append(row_dict)
+
+
+    json_str = json.dumps(data_json, indent=4)
+
+
+    return json_str
 
 
 @app.route("/info/<string:student_email>")
