@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 body {
   margin: 0;
   background-color: "#001340";
@@ -90,4 +93,15 @@ ul.options li.option-active {
   width: auto;
   min-width: 30rem;
   max-height: 30rem;
+}
+.click{
+    background-color: aliceblue;
+    padding: 4px;
+    font-size: 16px;
+    position: absolute;
+    top: 2.5em;
+    right:8em;
+    border-radius: 10px;
+    border-width: 0px;
+    font-family: 'Times New Roman', Times, serif;
 }

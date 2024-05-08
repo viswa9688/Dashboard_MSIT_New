@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Logout from "../components/Logout";
 import axios from "axios";
+import SearchBar from "../components/SearchBar";
+import "tailwindcss/tailwind.css"
 
 function Admin() {
   // State to store the CSV data
@@ -22,9 +24,19 @@ function Admin() {
     fetchCSVData();
   }, []);
 
+  function handleAddUser(){
+    
+  }
+
   return (
-    <div>
-      <h1>Admin Page</h1>
+    <div >
+      
+      <SearchBar/>
+      {/* Button using Tailwind CSS */}
+      <button className="bg-red">
+  Add user
+</button>
+
       <Logout/>
     </div>
   );

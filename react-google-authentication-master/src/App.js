@@ -12,6 +12,7 @@ import PresentationDisplay from "./components/PresentationDisplay";
 import Admin from "./pages/admin"; 
 import Mentor from "./pages/mentor"; 
 import Student from "./pages/student"; 
+import  "./App.css"
 
 export default function App() {
   const [isLoggedin, setIsLoggedin] = React.useState(false);
