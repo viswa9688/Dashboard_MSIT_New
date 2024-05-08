@@ -1,8 +1,13 @@
 import csv
 import smtplib
 import os
+import pickle
 
 from dotenv import load_dotenv
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow,Flow
+from google.auth.transport.requests import Request
+
 
 load_dotenv(verbose=True)
 def user_exists(email):
@@ -15,9 +20,8 @@ def user_exists(email):
 
 
 def send_email(email, username):
-    # Set up SMTP server
     smtp_server = "smtp.gmail.com"
-    smtp_port = 587  # Update with your SMTP port
+    smtp_port = 587 
     smtp_username = os.environ.get('SMTP_USERNAME')
     smtp_password = os.environ.get('SMTP_PASSWORD')
 
@@ -36,11 +40,37 @@ def send_email(email, username):
     Thanks,
     MSIT Admin
     """
-
     text = f'Subject: {subject}\n\n{message}'
 
-    # Send email
     server.sendmail(from_email, to_email, text)
-
-    # Disconnect from the SMTP server
     server.quit()
+
+
+def get_scores_from_excel():
+    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+    
+    creds = None
+    if os.path.exists('token.pickle'):
+        with open('token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                'credentials.json', SCOPES) 
+            creds = flow.run_local_server(port=0)
+        with open('token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    service = build('sheets', 'v4', credentials=creds)
+
+    sheet = service.spreadsheets()
+    result_input = sheet.values().get(spreadsheetId=os.environ.get('SPREADSHEET_ID'),
+                                range='A1:AA1000').execute()
+    values_input = result_input.get('values', [])
+
+    if not values_input:
+        print('No data found.')
+        return
+    return values_input

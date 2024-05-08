@@ -16,6 +16,7 @@ from utils import user_exists, send_email
 app = Flask(__name__)
 CORS(app)
 
+
 IT_course_dates = {
     "IDS":["2020-11-09", "2020-12-05"],
     "PSC":["2020-12-07", "2021-01-02"],
