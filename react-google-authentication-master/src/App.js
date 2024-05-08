@@ -12,7 +12,6 @@ import PresentationDisplay from "./components/PresentationDisplay";
 import Admin from "./pages/admin"; 
 import Mentor from "./pages/mentor"; 
 import Student from "./pages/student"; 
-import  "./App.css"
 
 export default function App() {
   const [isLoggedin, setIsLoggedin] = React.useState(false);
@@ -38,7 +37,7 @@ export default function App() {
           <Route path="/student">
             <Student />
           </Route>
-          <Route path="/" exact component={LandingPage} >
+          <Route path="/" exact component={LandingPage}>
             {isLoggedin ? (
               mentorFlag ? (
                 <Redirect to="/mentor" />
@@ -67,21 +66,65 @@ export default function App() {
                 <br />
               </div>
             ) : (
-              <Tabs
-                id="controlled-tab-example"
-                activeKey={key}
-                onSelect={(k) => setKey(k)}
-              >
-                {/* Render other tabs */}
-              </Tabs>
+              <React.Fragment>
+                <Tabs
+                  id="controlled-tab-example"
+                  activeKey={key}
+                  onSelect={(k) => setKey(k)}
+                >
+                  <Tab eventKey="performance" title="Performance">
+                    <PerformanceDisplay
+                      mentor={mentorFlag}
+                      email={email}
+                      attendance={data.dashboard_data.attendance}
+                      grades={data.dashboard_data.grades}
+                      lastUpdated={data.last_updated}
+                      courseStats={data.course_stats}
+                      percentageIT={data.course_attendance.IT}
+                      percentageSS={data.course_attendance.SS}
+                      learningCenter={data.dashboard_data.learning_center}
+                    />
+                  </Tab>
+                  <Tab eventKey="attendance" title="Attendance">
+                    <Display
+                      mentor={mentorFlag}
+                      userEmail={email}
+                      res={data}
+                      lastUpdated={data.last_updated}
+                      learningCenter={data.dashboard_data.learning_center}
+                      score={score}
+                      ss_score={ss_score}
+                    />
+                  </Tab>
+                  <Tab eventKey="presentation" title="Presentations">
+                    <PresentationDisplay
+                      mentor={mentorFlag}
+                      email={email}
+                      lastUpdated={data.last_updated}
+                      res={data}
+                      learningCenter={data.dashboard_data.learning_center}
+                      pptScores={data.dashboard_data.ppt_scores}
+                    />
+                  </Tab>
+                  <Tab eventKey="transcript" title="Transcript">
+                    <DisplayGrades
+                      mentor={mentorFlag}
+                      email={email}
+                      res={data}
+                      lastUpdated={data.last_updated}
+                      learningCenter={data.dashboard_data.learning_center}
+                    />
+                  </Tab>
+                </Tabs>
+                {dropoutFlag && <h5>Student has dropped out.</h5>}
+                <br />
+                <Logout
+                  updateLogin={setIsLoggedin}
+                  updateMentorFlag={setMentorFlag}
+                />
+                <br />
+              </React.Fragment>
             )}
-            {dropoutFlag && <h5>Student has dropped out.</h5>}
-            <br />
-            <Logout
-              updateLogin={setIsLoggedin}
-              updateMentorFlag={setMentorFlag}
-            />
-            <br />
           </React.Fragment>
         )}
       </div>

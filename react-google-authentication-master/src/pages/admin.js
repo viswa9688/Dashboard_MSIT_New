@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Logout from "../components/Logout";
 import axios from "axios";
 import SearchBar from "../components/SearchBar";
-import "tailwindcss/tailwind.css"
+import { Link } from "react-router-dom"; 
 
 function Admin() {
   // State to store the CSV data
@@ -33,9 +33,9 @@ function Admin() {
       
       <SearchBar/>
       {/* Button using Tailwind CSS */}
-      <button className="bg-red">
-  Add user
-</button>
+      <Link to="/add-user">
+        <button className="m-1 p-2 bg-primary">Add user</button>
+      </Link>
 
       <Logout/>
     </div>
