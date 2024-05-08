@@ -1,5 +1,9 @@
 {
   "dependencies": {
+    "csv": "^6.3.8",
+    "csv-parser": "^3.0.0",
+    "papaparse": "^5.4.1",
+    "parser": "^0.1.4",
     "react-responsive": "^10.0.0"
   }
 }
