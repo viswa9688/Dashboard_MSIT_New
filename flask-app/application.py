@@ -29,8 +29,8 @@ SS_course_dates = {
     "SS":["2021-02-08","2021-04-02"]
 }
 
-@app.route('/student-scores')
-def student_score_reader_excel():
+@app.route('/student-scores/<string:student_email>')
+def student_score_reader_excel(student_email):
     creds_path = "./msit.json"
     credential = ServiceAccountCredentials.from_json_keyfile_name(creds_path,
                                                                 ["https://spreadsheets.google.com/feeds",
@@ -48,15 +48,16 @@ def student_score_reader_excel():
     
     headers = values[0]
     for row in values[1:]:
-
-        row_dict = dict(zip(headers, row))
-        data_json.append(row_dict)
-
-
-    json_str = json.dumps(data_json, indent=4)
+        if row[1] == student_email:
+            return json.dumps([dict(zip(headers,row))],indent=4)
+        # row_dict = dict(zip(headers, row))
+        # data_json.append(row_dict)
 
 
-    return json_str
+    # json_str = json.dumps(data_json, indent=4)
+
+
+    return []
 
 
 @app.route("/info/<string:student_email>")
