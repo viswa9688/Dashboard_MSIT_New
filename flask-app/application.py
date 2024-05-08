@@ -9,6 +9,7 @@ import csv, json
 import pandas as pd
 from collections import OrderedDict 
 from collections import defaultdict
+from utils import get_scores_from_excel
 import datetime
 
 from utils import user_exists, send_email
@@ -54,6 +55,19 @@ def zoom_att(student_email):
         "dashboard_data": result
     })
 
+
+@app.route("/get_scores/<string:student_email>")
+def get_scores(student_email):
+    values = get_scores_from_excel()
+    headers = values[0]
+    json_str = None
+    for row in values[1:]:
+        if row[1] == student_email:
+            row_dict = dict(zip(headers, row))
+            json_str = json.dumps(row_dict, indent=4)
+    if json_str:
+        return json_str
+    return jsonify({'message': "Email Not found"})
 
 
 
