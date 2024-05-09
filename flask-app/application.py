@@ -15,7 +15,10 @@ import datetime
 from utils import user_exists, send_email
 
 app = Flask(__name__)
-CORS(app)
+cors = CORS(app, resources={
+    r"/api/*": {"origins": "*"},
+    r"/get_scores/*": {"origins": "http://localhost:3000"}
+})
 
 
 IT_course_dates = {
