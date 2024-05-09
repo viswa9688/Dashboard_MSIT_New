@@ -30,37 +30,47 @@ function StudentScores() {
   if (error) return <div>Error: {error}</div>;
   if (!studentData || studentData.length === 0) return <div>No data available</div>;
 
+  const tableStyle = {
+    width: '80%', // Set the width of the table
+    margin: 'auto', // Center the table horizontally
+    marginTop: '0px', // Add spacing on top
+    marginBottom: '20px', // Add spacing on bottom
+    borderCollapse: 'collapse',
+  };
+  const thStyle = {
+    backgroundColor: '#F2F2F2', // Light cement color for heading row
+    border: '1px solid black', // Black border for outside table lines
+    padding: '8px',
+  };
+  const cellStyle = {
+    border: '1px solid black', // Black border for outside table lines
+    padding: '8px',
+  };
+
   return (
     <div>
       <h1>Student Scores</h1>
-      <table>
+      <table style={tableStyle}>
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email ID</th>
-            <th>Discussions (10%)</th>
-            <th>Quiz (10%)</th>
-            <th>Assignment (20%)</th>
-            <th>Weekly (30%)</th>
-            <th>Total (70%)</th>
-            <th>End Sem (30%)</th>
-            <th>Total (100)</th>
-            <th>Grade</th>
+            <th style={thStyle}>Name</th>
+            <th style={thStyle}>Email ID</th>
+            <th style={thStyle}>Discussions (10%)</th>
+            <th style={thStyle}>Quiz (10%)</th>
+            <th style={thStyle}>Assignment (20%)</th>
+            <th style={thStyle}>Weekly (30%)</th>
+            <th style={thStyle}>Total (70%)</th>
+            <th style={thStyle}>End Sem (30%)</th>
+            <th style={thStyle}>Total (100)</th>
+            <th style={thStyle}>Grade</th>
           </tr>
         </thead>
         <tbody>
           {studentData.map((student, index) => (
             <tr key={index}>
-              <td>{student["Name"]}</td>
-              <td>{student["Email ID"]}</td>
-              <td>{student["Discussions (10%)"]}</td>
-              <td>{student["Quiz (10%)"]}</td>
-              <td>{student["Assignment (20%)"]}</td>
-              <td>{student["Weekly (30%)"]}</td>
-              <td>{student["Total (70%)"]}</td>
-              <td>{student["End Sem (30%)"]}</td>
-              <td>{student["Total (100)"]}</td>
-              <td>{student["Grade "]}</td>
+              {Object.keys(student).map((key) => (
+                <td style={cellStyle} key={key}>{student[key]}</td>
+              ))}
             </tr>
           ))}
         </tbody>
