@@ -319,19 +319,18 @@ def add_to_google_sheets(row):
 
 
 def process_data(data):
-    existing_emails = [row[0] for row in worksheet.get_all_values()]  # Fetch existing emails from Google Sheet
+    existing_emails = [row[0].lower() for row in worksheet.get_all_values()]  # Fetch existing emails from Google Sheet in lowercase
     unique_rows = []
     
     if isinstance(data, dict):  # Single JSON object
         email = data.get('email')
-        if email and email not in existing_emails:
+        if email and email.lower() not in existing_emails:  # Convert email to lowercase for comparison
             unique_rows.append(data)
     elif isinstance(data, list):  # List of JSON objects
         for entry in data:
             email = entry.get('email')
-            if email and email not in existing_emails:
+            if email and email.lower() not in existing_emails:  # Convert email to lowercase for comparison
                 unique_rows.append(entry)
-    
     else:
         return jsonify({'error': 'Invalid data format'})
     
