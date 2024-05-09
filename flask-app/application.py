@@ -342,11 +342,9 @@ def upload():
     if 'file' in request.files:
         file = request.files['file']
         if file.filename.endswith('.csv'):
-            reader = csv.DictReader(file.read().decode('utf-8').splitlines())
-            for row in reader:
-                email = row.get('email')
-                if not check_duplicate(email):
-                    add_to_google_sheets(row)
+            reader = list(csv.DictReader(file.read().decode('utf-8').splitlines()))
+            process_data(reader)
+            
     else:
         try:
             data = json.loads(request.data.decode('utf-8'))
@@ -355,6 +353,29 @@ def upload():
             return jsonify({'error': 'Invalid JSON data format'})
 
     return jsonify({'message': 'Data added successfully'})
+
+@app.route('/get_role', methods=['GET'])
+def get_role():
+
+    email = request.args.get('email')
+
+    if not email:
+        return jsonify({'error': 'Email parameter is missing'}), 400
+    
+    try:
+        data = worksheet.get_all_records()
+        print("Data from Google Sheet:", data)
+        for row in data:
+            print("Row from Google Sheet:", row)
+            if row['email'].lower() == email.lower():
+                print(email)
+                return jsonify({'role': row['role']})
+        
+        return jsonify({'error': 'Email not found'}), 404
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
