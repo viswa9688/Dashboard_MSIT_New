@@ -5,12 +5,13 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter } from "react-router-dom";
 import styles from "./index.css"
+import StudentScores from "./studentScore";
 
 import './App.css';
 
 ReactDOM.render(
 	<BrowserRouter >
-    <App />
+    <StudentScores />
   </BrowserRouter>,
   document.getElementById("root")
 );
