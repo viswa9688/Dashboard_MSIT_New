@@ -1,16 +1,32 @@
 import sys
 sys.path.append('C:/Python39/Lib/site-packages')
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 import csv, json
 import pandas as pd
 from collections import OrderedDict 
 from collections import defaultdict
 import datetime
+import os
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
+
+load_dotenv()
+sheet_url = os.getenv('sheet_url')
+creds_path = "./msit.json"
+credential = ServiceAccountCredentials.from_json_keyfile_name(creds_path,
+                                                              ["https://spreadsheets.google.com/feeds",
+                                                               "https://www.googleapis.com/auth/spreadsheets",
+                                                               "https://www.googleapis.com/auth/drive.file",
+                                                               "https://www.googleapis.com/auth/drive"])
+client = gspread.authorize(credential)
+client = gspread.authorize(credential)
+sheet = client.open_by_url(sheet_url)
 
 IT_course_dates = {
     "IDS":["2020-11-09", "2020-12-05"],
@@ -289,40 +305,38 @@ def get_presentation_scores():
     
     return ppt_scores
 
-from flask import Flask, request, jsonify
-import csv
-import os
-import json
 
-app = Flask(__name__)
-
-DATA_CSV_PATH = 'Dashboard_MSIT_New/react-google-authentication-master/src/components/Data1.csv'
+worksheet = sheet.get_worksheet(0)
 
 def check_duplicate(email):
-    with open(DATA_CSV_PATH, 'r', newline='') as file:
-        reader = csv.DictReader(file)
-        return any(row['email'] == email for row in reader)
+    existing_data = worksheet.get_all_values()
+    existing_emails = [row[0] for row in existing_data]  # Assuming emails are in the first column
+    return email in existing_emails
 
-def add_to_csv(row):
-    fieldnames = row.keys()
-    with open(DATA_CSV_PATH, 'a', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        if file.tell() == 0:
-            writer.writeheader()
-        writer.writerow(row)
+def add_to_google_sheets(row):
+    values = list(row.values())
+    worksheet.append_row(values)
+
 
 def process_data(data):
+    existing_emails = [row[0] for row in worksheet.get_all_values()]  # Fetch existing emails from Google Sheet
+    unique_rows = []
+    
     if isinstance(data, dict):  # Single JSON object
         email = data.get('email')
-        if email and not check_duplicate(email):
-            add_to_csv(data)
+        if email and email not in existing_emails:
+            unique_rows.append(data)
     elif isinstance(data, list):  # List of JSON objects
         for entry in data:
             email = entry.get('email')
-            if email and not check_duplicate(email):
-                add_to_csv(entry)
+            if email and email not in existing_emails:
+                unique_rows.append(entry)
+    
     else:
         return jsonify({'error': 'Invalid data format'})
+    
+    if unique_rows:
+        add_to_google_sheets(unique_rows)
 
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -333,7 +347,7 @@ def upload():
             for row in reader:
                 email = row.get('email')
                 if not check_duplicate(email):
-                    add_to_csv(row)
+                    add_to_google_sheets(row)
     else:
         try:
             data = json.loads(request.data.decode('utf-8'))
