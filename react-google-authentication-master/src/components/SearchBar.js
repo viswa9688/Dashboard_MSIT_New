@@ -157,7 +157,8 @@ export default function SearchBar(props) {
             className="search-box"
             value={searchEmail}
             onChange={(e) => {
-              const options = props.options;
+            //   const options = props.options;
+            const options = Array.isArray(props.options) ? props.options : [];
               const userInput = e.target.value;
               const filteredOptions = options.filter(
                 (optionName) =>

@@ -25,7 +25,6 @@ function Mentor() {
 
   return (
     <div>
-      <h1>Mentor Page</h1>
       <MentorDashboard/>
       <Logout/>
     </div>

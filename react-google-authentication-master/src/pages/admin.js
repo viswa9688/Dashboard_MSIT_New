@@ -24,20 +24,15 @@ function Admin() {
     fetchCSVData();
   }, []);
 
-  function handleAddUser(){
-    
-  }
-
   return (
-    <div >
+    <div>
       
-      <SearchBar/>
       {/* Button using Tailwind CSS */}
       <Link to="/add-user">
-        <button className="m-1 p-2 bg-primary">Add user</button>
+        <button className="p-2 m-1 bg-primary">Add user</button>
       </Link>
 
-      <Logout/>
+      <Logout />
     </div>
   );
 }
