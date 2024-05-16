@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 import os
 
 from flask import Flask, render_template, jsonify, request
+
+
+
 from flask_cors import CORS
 import csv, json
 import pandas as pd
@@ -99,6 +102,32 @@ def zoom_att(student_email):
         "success": True,
         "dashboard_data": result
     })
+
+
+def user_exists(email):
+    with open('user_data.csv', mode='r', newline='') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if row[0] == email:
+                return True
+    return False
+
+
+@app.route('/add-user/', methods=['POST'])
+def add_user():
+    user_details = request.get_json()
+
+    username = user_details['username']
+    email = user_details['email']
+
+    if user_exists(email):
+        return jsonify({'message': 'User details already exists'})
+
+    with open('./users/users.csv', mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow([email, username])
+
+    return jsonify({'message': 'User details stored successfully'}), 201
 
 @app.route("/update_data")
 def read_file():

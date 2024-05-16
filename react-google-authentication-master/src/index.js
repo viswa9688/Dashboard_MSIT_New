@@ -4,12 +4,12 @@ import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import { BrowserRouter } from "react-router-dom";
-
+import FetchData from "./FetchData";
 import './App.css';
 
 ReactDOM.render(
 	<BrowserRouter >
-    <App />
+    <FetchData />
   </BrowserRouter>,
   document.getElementById("root")
 );
