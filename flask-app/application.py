@@ -93,29 +93,47 @@ def add_user():
 
 @app.route('/add-users/', methods=['POST'])
 def add_users():
-    if 'file' not in request.files:
-        return jsonify({'message':'No file part'})
-
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'message': 'No selected file'})
-
-    if file and file.filename.endswith('.csv'):
+    unique_users = []
+    unregistered_users = []
+    if 'file' in request.files:
         try:
-            with open('./users/users.csv', mode='a', newline='', encoding='utf-8') as csvfile:
-                csv_writer = csv.writer(csvfile)
-                csv_file = io.TextIOWrapper(file, encoding='utf-8')
-                csv_reader = csv.reader(csv_file)
-                for row in csv_reader:
-                    if not user_exists(row[0]):
-                        csv_writer.writerow(row)
-                        
-            return jsonify({'message': 'Users details stored successfully'}), 201
-
+            file = request.files['file']
+            if file.filename.endswith('.csv'):
+                reader = list(csv.DictReader(
+                    file.read().decode('utf-8').splitlines()))
+                worksheet = get_worksheet('users_sheet')
+                existing_emails = [row[0].lower() for row in worksheet.get_all_values()]
+                
+                for entry in reader:
+                    email = entry.get('email')
+                    if all(key in entry for key in ('email','name','phone_num', 'role', 'batch','id')) and (entry['role'] != 'student' or entry['batch']!=""):
+                        if email and email.endswith("@msitprogram.net") and email.lower() not in existing_emails and validate_fields(entry['name'], entry['id'], entry['phone_num']):
+                            unique_users.append(list(entry.values()))
+                        else:
+                            unregistered_users.append(list(entry.values()))
+                    else:
+                        unregistered_users.append(list(entry.values()))
+                worksheet.append_rows(unique_users)
         except Exception as e:
-            return jsonify({'message': f'Error: {str(e)}'})
+            return jsonify({'Error': e})
     else:
-        return jsonify({'message': 'Invalid file format. Please upload a CSV file.'})
+        try:
+            data = json.loads(request.data.decode('utf-8'))
+            worksheet = get_worksheet('users_sheet')
+            existing_emails = [row[0].lower() for row in worksheet.get_all_values()]
+            email = data.get('email')
+            if all(key in data for key in ('email','name','phone_num', 'role', 'batch','id')) and (data['role'] != 'student' or data['batch']!=""):
+                if email and email.endswith("@msitprogram.net") and email.lower() not in existing_emails and validate_fields(data['name'], data['id'], data['phone_num']):
+                    unique_users.append(list(data.values()))
+                else:
+                    unregistered_users.append(list(entry.values()))
+            else:
+                unregistered_users.append(list(entry.values()))
+            worksheet.append_rows(unique_users)
+        except json.JSONDecodeError:
+            return jsonify({'error': 'Invalid JSON data format'})
+
+    return jsonify({'registered_users': unique_users, 'unregistered_users':unregistered_users})
 
 
 @app.route('/search-emails', methods=['GET'])
